@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { products } from "../data/products";
-import ProductCard from "../components/ProductCard";
+import ProductCard from "../components/Productcard";
 import Shimmer from "../components/Shimmer";
 
 const Products = () => {
