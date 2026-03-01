@@ -5,23 +5,28 @@ import {
   Box,
   IconButton,
   Badge,
-  InputBase
+  InputBase,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText
 } from "@mui/material";
 
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
-
-import AuthModal from "./AuthModal";
-import { useAuth } from "../context/AuthContext";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const Navbar = () => {
-  const [openAuth, setOpenAuth] = useState(false);
-  const { user, logout } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [open, setOpen] = useState(false);
 
   const linkStyle = ({ isActive }) => ({
     color: isActive ? "#a5d6a7" : "#fff",
@@ -29,30 +34,41 @@ const Navbar = () => {
     fontWeight: 500
   });
 
+  const navItems = [
+    { label: "Home", path: "/" },
+    { label: "Products", path: "/products" },
+    { label: "Cart", path: "/cart" },
+    { label: "Wishlist", path: "/wishlist" }
+  ];
+
   return (
-    <>
-      <AppBar position="sticky" sx={{ backgroundColor: "#2e7d32" }}>
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+    <AppBar position="sticky" sx={{ backgroundColor: "#2e7d32" }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
 
-          {/* Logo */}
-          <NavLink
-            to="/"
-            style={{ textDecoration: "none", color: "#fff" }}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              GreenCart
-            </Typography>
-          </NavLink>
+        {/* Logo */}
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          component={NavLink}
+          to="/"
+          sx={{ textDecoration: "none", color: "#fff" }}
+        >
+          GreenCart
+        </Typography>
 
-          {/* Nav Links */}
+        {/* Desktop Nav */}
+        {!isMobile && (
           <Box sx={{ display: "flex", gap: 3 }}>
-            <NavLink to="/" style={linkStyle}>Home</NavLink>
-            <NavLink to="/products" style={linkStyle}>Products</NavLink>
-            <NavLink to="/cart" style={linkStyle}>Cart</NavLink>
-            <NavLink to="/wishlist" style={linkStyle}>Wishlist</NavLink>
+            {navItems.map((item) => (
+              <NavLink key={item.path} to={item.path} style={linkStyle}>
+                {item.label}
+              </NavLink>
+            ))}
           </Box>
+        )}
 
-          {/* Search */}
+        {/* Desktop Search */}
+        {!isMobile && (
           <Box
             sx={{
               display: "flex",
@@ -69,51 +85,61 @@ const Navbar = () => {
             />
             <SearchIcon sx={{ color: "#2e7d32" }} />
           </Box>
+        )}
 
-          {/* Icons */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <IconButton sx={{ color: "#fff" }}>
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+        {/* Icons */}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton sx={{ color: "#fff" }}>
+            <Badge badgeContent={3} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
 
-            <IconButton sx={{ color: "#fff" }}>
-              <Badge badgeContent={1} color="error">
-                <ShoppingCartIcon />
-              </Badge>
-            </IconButton>
+          <IconButton sx={{ color: "#fff" }}>
+            <Badge badgeContent={1} color="error">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
 
-            {user ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography sx={{ color: "#fff", fontSize: "14px" }}>
-                  Hi, {user.name}
-                </Typography>
+          <IconButton sx={{ color: "#fff" }}>
+            <PersonIcon />
+          </IconButton>
 
-                <IconButton
-                  sx={{ color: "#fff" }}
-                  onClick={logout}
-                >
-                  <PersonIcon />
-                </IconButton>
-              </Box>
-            ) : (
+          {/* Mobile Menu */}
+          {isMobile && (
+            <>
               <IconButton
                 sx={{ color: "#fff" }}
-                onClick={() => setOpenAuth(true)}
+                onClick={() => setOpen(true)}
               >
-                <PersonIcon />
+                <MenuIcon />
               </IconButton>
-            )}
-          </Box>
-        </Toolbar>
-      </AppBar>
 
-      <AuthModal
-        open={openAuth}
-        handleClose={() => setOpenAuth(false)}
-      />
-    </>
+              <Drawer
+                anchor="left"
+                open={open}
+                onClose={() => setOpen(false)}
+              >
+                <List sx={{ width: 250 }}>
+                  {navItems.map((item) => (
+                    <ListItem
+                      button
+                      key={item.path}
+                      component={NavLink}
+                      to={item.path}
+                      onClick={() => setOpen(false)}
+                    >
+                      <ListItemText primary={item.label} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Drawer>
+            </>
+          )}
+        </Box>
+
+      </Toolbar>
+    </AppBar>
   );
 };
 
